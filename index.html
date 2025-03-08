@@ -114,12 +114,12 @@
         .controls button:hover {
             background: rgba(255, 255, 255, 0.2);
         }
-
+ 
         /* Фоны для разных режимов */
         body.PREP { background-color: #2A3B8F; }
         body.WORK { background-color: #FF9F1C; }
         body.REST { background-color: #FF4444; }
-
+ 
         /* Плавное появление и исчезновение сообщения "Good job bro!" */
         .good-job {
             position: absolute;
@@ -133,7 +133,7 @@
             visibility: hidden;
             animation: fadeInOut 3s forwards;
         }
-
+ 
         @keyframes fadeInOut {
             0% {
                 opacity: 0;
@@ -154,39 +154,39 @@
 </head>
 <body>
     <h1>Interval Timer</h1>
-
+ 
     <form id="timerForm">
         <label for="prepTime">Preparation Time (seconds):</label>
         <input type="number" id="prepTime" value="10" min="1">
-
+ 
         <label for="workTime">Work Time (seconds):</label>
         <input type="number" id="workTime" value="30" min="1">
-
+ 
         <label for="restTime">Rest Time (seconds):</label>
         <input type="number" id="restTime" value="15" min="1">
-
+ 
         <label for="repeats">Repeats:</label>
         <input type="number" id="repeats" value="3" min="1">
-
+ 
         <button type="submit">Start</button>
     </form>
-
+ 
     <div class="timer">
         <div class="time" id="timeDisplay">10</div>
         <div class="status" id="intervalStatus">PREP</div>
-
+ 
         <p id="repeatsLeft">Repeats Left: 3</p>
-
+ 
         <div class="progress-bar">
             <div class="progress" id="progressBar"></div>
         </div>
-
+ 
         <div class="controls">
             <button id="pauseBtn">Pause</button>
             <button id="stopBtn">Stop</button>
         </div>
     </div>
-
+ 
     <script>
         const form = document.getElementById('timerForm');
         const timerScreen = document.querySelector('.timer');
@@ -203,21 +203,21 @@
         let timer = null;
         let isPaused = false;
         let audio = new Audio('https://www.soundjay.com/button/beep-07.wav');  // Звук бипа
-
+ 
         form.addEventListener('submit', (e) => {
             e.preventDefault();
             const prepTime = +document.getElementById('prepTime').value;
             const workTime = +document.getElementById('workTime').value;
             const restTime = +document.getElementById('restTime').value;
             const repeats = +document.getElementById('repeats').value;
-
+ 
             intervals = [];
             for (let i = 0; i < repeats; i++) {
                 intervals.push({ type: 'PREP', time: prepTime });
                 intervals.push({ type: 'WORK', time: workTime });
                 intervals.push({ type: 'REST', time: restTime });
             }
-
+ 
             currentInterval = 0;
             timeRemaining = intervals[currentInterval].time;
             startTimer();
@@ -225,7 +225,7 @@
             timerScreen.style.display = 'block';
             updateDisplay();
         });
-
+ 
         function startTimer() {
             clearInterval(timer);
             timer = setInterval(() => {
@@ -244,7 +244,7 @@
                 }
             }, 1000);
         }
-
+ 
         function nextInterval() {
             currentInterval++;
             if (currentInterval >= intervals.length) {
@@ -257,38 +257,38 @@
             timeRemaining = intervals[currentInterval].time;
             updateDisplay();
         }
-
+ 
         function updateDisplay() {
-           timeDisplay.textContent = timeRemaining;
+            timeDisplay.textContent = timeRemaining;
             const current = intervals[currentInterval];
             intervalStatus.textContent = current.type;
             body.className = current.type;
             updateProgress();
-
+ 
             let remainingRepeats = Math.ceil((intervals.length - currentInterval - 1) / 3);
-            repeatsLeft.textContent = Repeats Left: ${remainingRepeats};
+            repeatsLeft.textContent = `Repeats Left: ${remainingRepeats}`;
         }
-
+ 
         function updateProgress() {
             const current = intervals[currentInterval];
             const progress = ((current.time - timeRemaining) / current.time) * 100;
-            progressBar.style.width = ${progress}%;
+            progressBar.style.width = `${progress}%`;
         }
-
+ 
         pauseBtn.addEventListener('click', () => {
             isPaused = !isPaused;
             pauseBtn.textContent = isPaused ? 'Resume' : 'Pause';
         });
-
+ 
         stopBtn.addEventListener('click', resetTimer);
-
+ 
         function resetTimer() {
             clearInterval(timer);
             form.style.display = 'flex';
             timerScreen.style.display = 'none';
             body.className = '';
         }
-
+ 
         function triggerGoodJobMessage() {
             const goodJobMessage = document.createElement('div');
             goodJobMessage.classList.add('good-job');
@@ -296,7 +296,7 @@
             document.body.appendChild(goodJobMessage);
             overlay.style.opacity = '1';  // Показываем затемнение
             overlay.style.visibility = 'visible';
-
+ 
             setTimeout(() => {
                 goodJobMessage.remove();
                 overlay.style.opacity = '0';  // Скрываем затемнение
