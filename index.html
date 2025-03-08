@@ -120,7 +120,7 @@
         body.WORK { background-color: #FF9F1C; }
         body.REST { background-color: #FF4444; }
  
-        /* Плавное появление и исчезновение сообщения "Good job bro!" */
+        /* Плавное появление и исчезновение сообщения "Good job" */
         .good-job {
             position: absolute;
             top: 50%;
@@ -149,6 +149,18 @@
                 opacity: 0;
                 visibility: hidden;
             }
+        }
+ 
+        /* Стиль для overlay */
+        #overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);  /* Полупрозрачный черный */
+            z-index: 1000;
+            display: none;
         }
     </style>
 </head>
@@ -187,6 +199,8 @@
         </div>
     </div>
  
+    <div id="overlay"></div>  <!-- Элемент для затемнения -->
+ 
     <script>
         const form = document.getElementById('timerForm');
         const timerScreen = document.querySelector('.timer');
@@ -197,12 +211,13 @@
         const stopBtn = document.getElementById('stopBtn');
         const body = document.body;
         const repeatsLeft = document.getElementById('repeatsLeft');
+        const overlay = document.getElementById('overlay');  // Элемент для overlay
         let intervals = [];
         let currentInterval = 0;
         let timeRemaining = 0;
         let timer = null;
         let isPaused = false;
-        let audio = new Audio('https://www.soundjay.com/button/beep-07.wav');  // Звук бипа
+        let audio = new Audio('assets/beep-07.wav');  // Поменяй на свой путь к файлу
  
         form.addEventListener('submit', (e) => {
             e.preventDefault();
@@ -270,8 +285,8 @@
         }
  
         function updateProgress() {
-            const current = intervals[currentInterval];
-            const progress = ((current.time - timeRemaining) / current.time) * 100;
+            const totalTime = intervals[currentInterval].time;
+            const progress = ((totalTime - timeRemaining) / totalTime) * 100;
             progressBar.style.width = `${progress}%`;
         }
  
@@ -283,10 +298,12 @@
         stopBtn.addEventListener('click', resetTimer);
  
         function resetTimer() {
-            clearInterval(timer);
-            form.style.display = 'flex';
+            form.style.display = 'block';
             timerScreen.style.display = 'none';
-            body.className = '';
+            clearInterval(timer);
+            form.reset();
+            isPaused = false;
+            pauseBtn.textContent = 'Pause';
         }
  
         function triggerGoodJobMessage() {
@@ -294,14 +311,15 @@
             goodJobMessage.classList.add('good-job');
             goodJobMessage.textContent = 'Good job bro! 🤾🏻‍♂️💪🏼';
             document.body.appendChild(goodJobMessage);
-            overlay.style.opacity = '1';  // Показываем затемнение
-            overlay.style.visibility = 'visible';
  
+            // Показываем overlay
+            overlay.style.display = 'block';
+ 
+            // Убираем сообщение и затемнение после завершения анимации
             setTimeout(() => {
                 goodJobMessage.remove();
-                overlay.style.opacity = '0';  // Скрываем затемнение
-                overlay.style.visibility = 'hidden';
-            }, 3000);
+                overlay.style.display = 'none';
+            }, 3000);  // Сообщение исчезает через 3 секунды
         }
     </script>
 </body>
