@@ -21,8 +21,7 @@
             align-items: center;
             height: 100vh;
             flex-direction: column;
-            gap: 30px;
-            padding: 20px;
+            gap: 20px;
             transition: background 0.5s ease;
         }
         h1 {
@@ -33,8 +32,8 @@
             background: #1e1e1e;
             padding: 30px;
             border-radius: 12px;
-            max-width: 400px;
             width: 100%;
+            max-width: 400px;
             display: flex;
             flex-direction: column;
             gap: 15px;
@@ -58,7 +57,6 @@
             border: none;
             border-radius: 8px;
             cursor: pointer;
-            transition: background 0.3s ease;
         }
         button:hover {
             background: #218838;
@@ -71,16 +69,15 @@
             border-radius: 12px;
             max-width: 400px;
             width: 100%;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
         }
         .time {
             font-size: 5rem;
             font-family: 'Impact', sans-serif;
-            margin-bottom: 10px;
         }
         .status {
             font-size: 2rem;
             font-family: 'Bebas Neue', sans-serif;
+            margin: 10px 0;
         }
         .progress-bar {
             width: 100%;
@@ -92,127 +89,84 @@
         .progress {
             height: 100%;
             width: 0;
-            border-radius: 8px;
             background: #28A745;
+            border-radius: 8px;
             transition: width 0.5s ease;
         }
-        .controls {
-            display: flex;
-            gap: 20px;
-            justify-content: center;
-        }
-        .controls button {
-            font-family: 'Bebas Neue', sans-serif;
-            padding: 10px 20px;
-            font-size: 1.5rem;
-            border: 2px solid white;
-            background: transparent;
-            color: white;
-            cursor: pointer;
-            transition: background 0.3s ease;
-        }
-        .controls button:hover {
-            background: rgba(255, 255, 255, 0.2);
-        }
- 
-        /* Фоны для разных режимов */
-        body.PREP { background-color: #2A3B8F; }
-        body.WORK { background-color: #FF9F1C; }
-        body.REST { background-color: #FF4444; }
- 
-        /* Анимация сообщения */
         .good-job {
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
             font-family: 'Bebas Neue', sans-serif;
             font-size: 3rem;
             color: white;
             opacity: 0;
             visibility: hidden;
-            z-index: 1001;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
+        .show {
+            opacity: 1;
+            visibility: visible;
             animation: fadeInOut 3s forwards;
         }
- 
         @keyframes fadeInOut {
-            0% {
+            0%, 100% {
                 opacity: 0;
-                visibility: visible;
             }
-            20% {
+            20%, 80% {
                 opacity: 1;
             }
-            80% {
-                opacity: 1;
-            }
-            100% {
-                opacity: 0;
-                visibility: hidden;
-            }
         }
- 
-        /* Оверлей */
-        #overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.5);
-            z-index: 1000;
-            display: none;
-        }
+        body.PREP { background-color: #2A3B8F; }
+        body.WORK { background-color: #FF9F1C; }
+        body.REST { background-color: #FF4444; }
     </style>
 </head>
 <body>
     <h1>Interval Timer</h1>
- 
+
     <form id="timerForm">
         <label for="prepTime">Preparation Time (seconds):</label>
         <input type="number" id="prepTime" value="10" min="1">
- 
+
         <label for="workTime">Work Time (seconds):</label>
         <input type="number" id="workTime" value="30" min="1">
- 
+
         <label for="restTime">Rest Time (seconds):</label>
         <input type="number" id="restTime" value="15" min="1">
- 
+
         <label for="repeats">Repeats:</label>
         <input type="number" id="repeats" value="3" min="1">
- 
+
         <button type="submit">Start</button>
     </form>
- 
-    <div class="timer">
+
+    <div class="timer" id="timerScreen">
         <div class="time" id="timeDisplay">10</div>
         <div class="status" id="intervalStatus">PREP</div>
         <p id="repeatsLeft">Repeats Left: 3</p>
         <div class="progress-bar"><div class="progress" id="progressBar"></div></div>
-        <div class="controls">
-            <button id="pauseBtn">Pause</button>
-            <button id="stopBtn">Stop</button>
-        </div>
     </div>
- 
-    <div id="overlay"></div>
- 
+
+    <div class="good-job" id="goodJob">Good job bro! 🤾🏻‍♂️💪🏼</div>
+
+    <audio id="beep" src="assets/milestone.mp3"></audio>
+
     <script>
-        const audio = new Audio('assets/milestone.mp3');
-        const overlay = document.getElementById('overlay');
         const form = document.getElementById('timerForm');
-        const timerScreen = document.querySelector('.timer');
+        const timerScreen = document.getElementById('timerScreen');
         const timeDisplay = document.getElementById('timeDisplay');
         const intervalStatus = document.getElementById('intervalStatus');
         const progressBar = document.getElementById('progressBar');
-        const pauseBtn = document.getElementById('pauseBtn');
-        const stopBtn = document.getElementById('stopBtn');
         const repeatsLeft = document.getElementById('repeatsLeft');
+        const goodJob = document.getElementById('goodJob');
+        const beep = document.getElementById('beep');
+
         let intervals = [];
         let currentInterval = 0;
         let timeRemaining = 0;
         let timer = null;
-        let isPaused = false;
+        let totalTime = 0;
 
         form.addEventListener('submit', (e) => {
             e.preventDefault();
@@ -220,9 +174,25 @@
         });
 
         function startTimer() {
-            clearInterval(timer);
+            const prepTime = +document.getElementById('prepTime').value;
+            const workTime = +document.getElementById('workTime').value;
+            const restTime = +document.getElementById('restTime').value;
+            const repeats = +document.getElementById('repeats').value;
+
+            intervals = [
+                { type: 'PREP', time: prepTime }
+            ];
+
+            for (let i = 0; i < repeats; i++) {
+                intervals.push({ type: 'WORK', time: workTime });
+                if (i < repeats - 1) intervals.push({ type: 'REST', time: restTime });
+            }
+
+            totalTime = intervals.reduce((acc, curr) => acc + curr.time, 0);
+            currentInterval = 0;
             timerScreen.style.display = 'block';
             form.style.display = 'none';
+
             nextInterval();
         }
 
@@ -232,36 +202,43 @@
                 resetTimer();
                 return;
             }
-            timeRemaining = intervals[currentInterval].time;
-            updateDisplay();
-            timer = setInterval(tick, 1000);
-        }
 
-        function tick() {
-            if (timeRemaining <= 0) {
-                audio.play();
-                currentInterval++;
-                nextInterval();
-            } else {
-                timeRemaining--;
-                updateDisplay();
-            }
+            const interval = intervals[currentInterval];
+            timeRemaining = interval.time;
+            intervalStatus.textContent = interval.type;
+            document.body.className = interval.type;
+
+            updateDisplay();
+            timer = setInterval(() => {
+                if (timeRemaining <= 0) {
+                    beep.play();
+                    currentInterval++;
+                    nextInterval();
+                } else {
+                    timeRemaining--;
+                    updateDisplay();
+                }
+            }, 1000);
         }
 
         function updateDisplay() {
             timeDisplay.textContent = timeRemaining;
-            intervalStatus.textContent = intervals[currentInterval]?.type || 'Done';
+            repeatsLeft.textContent = `Repeats Left: ${intervals.filter(i => i.type === 'WORK').length - intervals.filter((_, i) => i <= currentInterval && intervals[i].type === 'WORK').length}`;
+            const completedTime = intervals.slice(0, currentInterval).reduce((acc, curr) => acc + curr.time, 0);
+            const progress = (completedTime / totalTime) * 100;
+            progressBar.style.width = `${progress}%`;
         }
 
         function showGoodJob() {
-            overlay.style.display = 'block';
-            setTimeout(() => overlay.style.display = 'none', 3000);
+            goodJob.classList.add('show');
+            setTimeout(() => goodJob.classList.remove('show'), 3000);
         }
 
         function resetTimer() {
+            clearInterval(timer);
             form.style.display = 'block';
             timerScreen.style.display = 'none';
-            clearInterval(timer);
+            document.body.className = '';
         }
     </script>
 </body>
