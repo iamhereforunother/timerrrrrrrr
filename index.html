@@ -115,7 +115,25 @@
         .controls button:hover {
             background: rgba(255, 255, 255, 0.2);
         }
- 
+        .image-container {
+    width: 100%;
+    max-width: 400px;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 30px 60px rgba(0, 0, 0, 0.5); /* Тень */
+    position: fixed;
+    bottom: 20px; /* Располагаем внизу страницы */
+    left: 50%;
+    transform: translateX(-50%); /* Центрируем */
+    opacity: 0;
+    transition: opacity 0.5s ease; /* Плавное появление/исчезновение */
+       }
+
+       .image-container img {
+    width: 100%;
+    height: auto;
+    display: block;
+       }
         /* Фоны для разных режимов */
         body.PREP { background-color: #2A3B8F; }
         body.WORK { background-color: #FF9F1C; }
@@ -163,6 +181,7 @@
             z-index: 1000;
             display: none;
         }
+    
     </style>
 </head>
 <body>
@@ -199,7 +218,10 @@
             <button id="stopBtn">Stop</button>
         </div>
     </div>
- 
+ <!-- Блок с изображением снизу -->
+<div class="image-container" id="imageContainer">
+    <img src="https://i.pinimg.com/736x/1f/0f/5d/1f0f5d4bf16a8570cda3cff4674578e9.jpg" alt="Image">
+</div>
     <div id="overlay"></div>  <!-- Элемент для затемнения -->
  
     <script>
@@ -242,24 +264,26 @@
         updateDisplay();
     });
 
-    function startTimer() {
-        clearInterval(timer);
-        timer = setInterval(() => {
-            if (!isPaused) {
-                timeRemaining--;
-                updateProgress();
-                if (timeRemaining < 0) {
-                    playSound(); // Звук при конце каждого интервала
-                    if (navigator.vibrate) {
-                        navigator.vibrate([200]);
-                    }
-                    nextInterval();
-                } else {
-                    updateDisplay();
+    // Скрыть изображение при начале таймера
+function startTimer() {
+    imageContainer.style.opacity = 0;  // Скрыть изображение
+    clearInterval(timer);
+    timer = setInterval(() => {
+        if (!isPaused) {
+            timeRemaining--;
+            updateProgress();
+            if (timeRemaining < 0) {
+                playSound();
+                if (navigator.vibrate) {
+                    navigator.vibrate([200]);
                 }
+                nextInterval();
+            } else {
+                updateDisplay();
             }
-        }, 1000);
-    }
+        }
+    }, 1000);
+}
 
     function nextInterval() {
         currentInterval++;
