@@ -114,15 +114,14 @@
         .controls button:hover {
             background: rgba(255, 255, 255, 0.2);
         }
- 
+
         /* Фоны для разных режимов */
         body.PREP { background-color: #2A3B8F; }
         body.WORK { background-color: #FF9F1C; }
         body.REST { background-color: #FF4444; }
- 
-        /* Плавное появление и исчезновение сообщения "Good job" */
+
         .good-job {
-            position: absolute;
+            position: fixed;
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
@@ -131,34 +130,24 @@
             color: white;
             opacity: 0;
             visibility: hidden;
+            z-index: 1001;
             animation: fadeInOut 3s forwards;
         }
- 
+
         @keyframes fadeInOut {
-            0% {
-                opacity: 0;
-                visibility: visible;
-            }
-            20% {
-                opacity: 1;
-            }
-            80% {
-                opacity: 1;
-            }
-            100% {
-                opacity: 0;
-                visibility: hidden;
-            }
+            0% { opacity: 0; visibility: visible; }
+            20% { opacity: 1; }
+            80% { opacity: 1; }
+            100% { opacity: 0; visibility: hidden; }
         }
- 
-        /* Стиль для overlay */
+
         #overlay {
             position: fixed;
             top: 0;
             left: 0;
             right: 0;
             bottom: 0;
-            background: rgba(0, 0, 0, 0.5);  /* Полупрозрачный черный */
+            background: rgba(0, 0, 0, 0.5);
             z-index: 1000;
             display: none;
         }
@@ -166,41 +155,40 @@
 </head>
 <body>
     <h1>Interval Timer</h1>
- 
+
     <form id="timerForm">
         <label for="prepTime">Preparation Time (seconds):</label>
         <input type="number" id="prepTime" value="10" min="1">
- 
+
         <label for="workTime">Work Time (seconds):</label>
         <input type="number" id="workTime" value="30" min="1">
- 
+
         <label for="restTime">Rest Time (seconds):</label>
         <input type="number" id="restTime" value="15" min="1">
- 
+
         <label for="repeats">Repeats:</label>
         <input type="number" id="repeats" value="3" min="1">
- 
+
         <button type="submit">Start</button>
     </form>
- 
+
     <div class="timer">
         <div class="time" id="timeDisplay">10</div>
         <div class="status" id="intervalStatus">PREP</div>
- 
         <p id="repeatsLeft">Repeats Left: 3</p>
- 
+
         <div class="progress-bar">
             <div class="progress" id="progressBar"></div>
         </div>
- 
+
         <div class="controls">
             <button id="pauseBtn">Pause</button>
             <button id="stopBtn">Stop</button>
         </div>
     </div>
- 
-    <div id="overlay"></div>  <!-- Элемент для затемнения -->
- 
+
+    <div id="overlay"></div>
+
     <script>
         const form = document.getElementById('timerForm');
         const timerScreen = document.querySelector('.timer');
@@ -211,115 +199,55 @@
         const stopBtn = document.getElementById('stopBtn');
         const body = document.body;
         const repeatsLeft = document.getElementById('repeatsLeft');
-        const overlay = document.getElementById('overlay');  // Элемент для overlay
+        const overlay = document.getElementById('overlay');
+        const audio = new Audio('assets/milestone.mp3');
+        
         let intervals = [];
         let currentInterval = 0;
         let timeRemaining = 0;
         let timer = null;
         let isPaused = false;
-        let audio = new Audio('assets/milestone.mp3')  // Поменяй на свой путь к файлу
- 
+
         form.addEventListener('submit', (e) => {
             e.preventDefault();
-            const prepTime = +document.getElementById('prepTime').value;
-            const workTime = +document.getElementById('workTime').value;
-            const restTime = +document.getElementById('restTime').value;
-            const repeats = +document.getElementById('repeats').value;
- 
-            intervals = [];
-            for (let i = 0; i < repeats; i++) {
-                intervals.push({ type: 'PREP', time: prepTime });
-                intervals.push({ type: 'WORK', time: workTime });
-                intervals.push({ type: 'REST', time: restTime });
-            }
- 
+            const prepTime = +prepTime.value;
+            const workTime = +workTime.value;
+            const restTime = +restTime.value;
+            const repeats = +repeats.value;
+
+            intervals = Array(repeats).flatMap(() => [
+                { type: 'PREP', time: prepTime },
+                { type: 'WORK', time: workTime },
+                { type: 'REST', time: restTime }
+            ]);
+
             currentInterval = 0;
-            timeRemaining = intervals[currentInterval].time;
-            startTimer();
+            timeRemaining = intervals[0].time;
             form.style.display = 'none';
             timerScreen.style.display = 'block';
-            updateDisplay();
+            startTimer();
         });
- 
+
         function startTimer() {
-            clearInterval(timer);
             timer = setInterval(() => {
-                if (!isPaused) {
-                    timeRemaining--;
-                    updateProgress();
-                    if (timeRemaining < 0) {
-                        audio.play();  // Звук по завершению интервала
-                        if (navigator.vibrate) {
-                            navigator.vibrate([200]);  // Вибрация на 200ms
-                        }
-                        nextInterval();
-                    } else {
-                        updateDisplay();
-                    }
-                }
+                if (!isPaused && timeRemaining-- <= 0) nextInterval();
+                updateDisplay();
             }, 1000);
         }
- 
+
         function nextInterval() {
+            audio.play();
             currentInterval++;
-            if (currentInterval >= intervals.length) {
-                clearInterval(timer);
-                triggerGoodJobMessage();  // Показать сообщение
-                alert('Workout Complete!');
-                resetTimer();
-                return;
-            }
+            if (currentInterval >= intervals.length) return finishTimer();
             timeRemaining = intervals[currentInterval].time;
-            updateDisplay();
         }
- 
-        function updateDisplay() {
-            timeDisplay.textContent = timeRemaining;
-            const current = intervals[currentInterval];
-            intervalStatus.textContent = current.type;
-            body.className = current.type;
-            updateProgress();
- 
-            let remainingRepeats = Math.ceil((intervals.length - currentInterval - 1) / 3);
-            repeatsLeft.textContent = `Repeats Left: ${remainingRepeats}`;
-        }
- 
-        function updateProgress() {
-            const totalTime = intervals[currentInterval].time;
-            const progress = ((totalTime - timeRemaining) / totalTime) * 100;
-            progressBar.style.width = `${progress}%`;
-        }
- 
-        pauseBtn.addEventListener('click', () => {
-            isPaused = !isPaused;
-            pauseBtn.textContent = isPaused ? 'Resume' : 'Pause';
-        });
- 
-        stopBtn.addEventListener('click', resetTimer);
- 
-        function resetTimer() {
-            form.style.display = 'block';
-            timerScreen.style.display = 'none';
+
+        function finishTimer() {
             clearInterval(timer);
-            form.reset();
-            isPaused = false;
-            pauseBtn.textContent = 'Pause';
-        }
- 
-        function triggerGoodJobMessage() {
-            const goodJobMessage = document.createElement('div');
-            goodJobMessage.classList.add('good-job');
-            goodJobMessage.textContent = 'Good job bro! 🤾🏻‍♂️💪🏼';
-            document.body.appendChild(goodJobMessage);
- 
-            // Показываем overlay
             overlay.style.display = 'block';
- 
-            // Убираем сообщение и затемнение после завершения анимации
-            setTimeout(() => {
-                goodJobMessage.remove();
-                overlay.style.display = 'none';
-            }, 3000);  // Сообщение исчезает через 3 секунды
+            body.style.background = '#121212';
+            document.body.insertAdjacentHTML('beforeend', '<div class="good-job">Good job bro! 🤾🏻‍♂️💪🏼</div>');
+            setTimeout(() => overlay.style.display = 'none', 3000);
         }
     </script>
 </body>
