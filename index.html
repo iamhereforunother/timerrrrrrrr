@@ -11,9 +11,9 @@
             box-sizing: border-box;
             margin: 0;
             padding: 0;
+            font-family: 'Arial', sans-serif;
         }
         body {
-            font-family: 'Arial', sans-serif;
             background: #121212;
             color: white;
             display: flex;
@@ -22,6 +22,7 @@
             height: 100vh;
             flex-direction: column;
             gap: 30px;
+            padding: 20px;
             transition: background 0.5s ease;
         }
         h1 {
@@ -57,6 +58,7 @@
             border: none;
             border-radius: 8px;
             cursor: pointer;
+            transition: background 0.3s ease;
         }
         button:hover {
             background: #218838;
@@ -69,6 +71,7 @@
             border-radius: 12px;
             max-width: 400px;
             width: 100%;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
         }
         .time {
             font-size: 5rem;
@@ -91,6 +94,7 @@
             width: 0;
             border-radius: 8px;
             background: #28A745;
+            transition: width 0.5s ease;
         }
         .controls {
             display: flex;
@@ -98,19 +102,25 @@
             justify-content: center;
         }
         .controls button {
+            font-family: 'Bebas Neue', sans-serif;
             padding: 10px 20px;
             font-size: 1.5rem;
             border: 2px solid white;
             background: transparent;
             color: white;
             cursor: pointer;
+            transition: background 0.3s ease;
         }
         .controls button:hover {
             background: rgba(255, 255, 255, 0.2);
         }
+ 
+        /* Фоны для разных режимов */
         body.PREP { background-color: #2A3B8F; }
         body.WORK { background-color: #FF9F1C; }
         body.REST { background-color: #FF4444; }
+ 
+        /* Анимация сообщения */
         .good-job {
             position: fixed;
             top: 50%;
@@ -121,122 +131,137 @@
             color: white;
             opacity: 0;
             visibility: hidden;
-        }
-        .show {
+            z-index: 1001;
             animation: fadeInOut 3s forwards;
         }
+ 
         @keyframes fadeInOut {
-            0% { opacity: 0; visibility: visible; }
-            20% { opacity: 1; }
-            80% { opacity: 1; }
-            100% { opacity: 0; visibility: hidden; }
+            0% {
+                opacity: 0;
+                visibility: visible;
+            }
+            20% {
+                opacity: 1;
+            }
+            80% {
+                opacity: 1;
+            }
+            100% {
+                opacity: 0;
+                visibility: hidden;
+            }
+        }
+ 
+        /* Оверлей */
+        #overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            display: none;
         }
     </style>
 </head>
 <body>
     <h1>Interval Timer</h1>
-
+ 
     <form id="timerForm">
         <label for="prepTime">Preparation Time (seconds):</label>
         <input type="number" id="prepTime" value="10" min="1">
-
+ 
         <label for="workTime">Work Time (seconds):</label>
         <input type="number" id="workTime" value="30" min="1">
-
+ 
         <label for="restTime">Rest Time (seconds):</label>
         <input type="number" id="restTime" value="15" min="1">
-
+ 
         <label for="repeats">Repeats:</label>
         <input type="number" id="repeats" value="3" min="1">
-
+ 
         <button type="submit">Start</button>
     </form>
-
+ 
     <div class="timer">
         <div class="time" id="timeDisplay">10</div>
         <div class="status" id="intervalStatus">PREP</div>
         <p id="repeatsLeft">Repeats Left: 3</p>
-
-        <div class="progress-bar">
-            <div class="progress" id="progressBar"></div>
-        </div>
-
+        <div class="progress-bar"><div class="progress" id="progressBar"></div></div>
         <div class="controls">
             <button id="pauseBtn">Pause</button>
             <button id="stopBtn">Stop</button>
         </div>
     </div>
-
-    <div id="goodJob" class="good-job">Good job bro! 🤾🏻‍♂️💪🏼</div>
-
+ 
+    <div id="overlay"></div>
+ 
     <script>
+        const audio = new Audio('assets/milestone.mp3');
+        const overlay = document.getElementById('overlay');
         const form = document.getElementById('timerForm');
         const timerScreen = document.querySelector('.timer');
         const timeDisplay = document.getElementById('timeDisplay');
         const intervalStatus = document.getElementById('intervalStatus');
         const progressBar = document.getElementById('progressBar');
-        const goodJob = document.getElementById('goodJob');
+        const pauseBtn = document.getElementById('pauseBtn');
+        const stopBtn = document.getElementById('stopBtn');
         const repeatsLeft = document.getElementById('repeatsLeft');
-        const audio = new Audio('assets/milestone.mp3');
-
         let intervals = [];
         let currentInterval = 0;
         let timeRemaining = 0;
-        let timer;
+        let timer = null;
+        let isPaused = false;
 
         form.addEventListener('submit', (e) => {
             e.preventDefault();
-            const prepTime = +prepTime.value;
-            const workTime = +workTime.value;
-            const restTime = +restTime.value;
-            const repeats = +repeats.value;
-
-            intervals = Array.from({ length: repeats }, () => [
-                { type: 'PREP', time: prepTime },
-                { type: 'WORK', time: workTime },
-                { type: 'REST', time: restTime }
-            ]).flat();
-
-            currentInterval = 0;
-            startInterval();
-            form.style.display = 'none';
-            timerScreen.style.display = 'block';
+            startTimer();
         });
 
-        function startInterval() {
-            const interval = intervals[currentInterval];
-            if (!interval) {
-                finishTimer();
+        function startTimer() {
+            clearInterval(timer);
+            timerScreen.style.display = 'block';
+            form.style.display = 'none';
+            nextInterval();
+        }
+
+        function nextInterval() {
+            if (currentInterval >= intervals.length) {
+                showGoodJob();
+                resetTimer();
                 return;
             }
-            timeRemaining = interval.time;
-            intervalStatus.textContent = interval.type;
-            document.body.className = interval.type;
+            timeRemaining = intervals[currentInterval].time;
             updateDisplay();
+            timer = setInterval(tick, 1000);
+        }
 
-            timer = setInterval(() => {
+        function tick() {
+            if (timeRemaining <= 0) {
+                audio.play();
+                currentInterval++;
+                nextInterval();
+            } else {
                 timeRemaining--;
                 updateDisplay();
-                if (timeRemaining <= 0) {
-                    clearInterval(timer);
-                    audio.play();
-                    currentInterval++;
-                    startInterval();
-                }
-            }, 1000);
+            }
         }
 
         function updateDisplay() {
             timeDisplay.textContent = timeRemaining;
-            const total = intervals[currentInterval]?.time || 1;
-            progressBar.style.width = `${(1 - timeRemaining / total) * 100}%`;
+            intervalStatus.textContent = intervals[currentInterval]?.type || 'Done';
         }
 
-        function finishTimer() {
-            document.body.className = '';
-            goodJob.classList.add('show');
+        function showGoodJob() {
+            overlay.style.display = 'block';
+            setTimeout(() => overlay.style.display = 'none', 3000);
+        }
+
+        function resetTimer() {
             form.style.display = 'block';
             timerScreen.style.display = 'none';
+            clearInterval(timer);
         }
     </script>
 </body>
