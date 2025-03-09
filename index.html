@@ -199,7 +199,7 @@
         </div>
     </div>
  
-    <div id="overlay"></div>  <!-- Элемент для затемнения -->
+    <div id="overlay"></div>  <!-- Элемент для overlay -->
  
     <script>
         const form = document.getElementById('timerForm');
@@ -261,32 +261,17 @@
         }
  
         function nextInterval() {
-    audio.play();  // Сигнал после каждого интервала
-    if (navigator.vibrate) {
-        navigator.vibrate([300, 100, 300]);  // Вибрация
-    }
-    flashBackground();  // Визуальный сигнал
-
-    currentInterval++;
-    if (currentInterval >= intervals.length) {
-        clearInterval(timer);
-        triggerGoodJobMessage();
-        alert('Workout Complete!');
-        resetTimer();
-        return;
-    }
-    timeRemaining = intervals[currentInterval].time;
-    updateDisplay();
-}
-
-function flashBackground() {
-    body.style.transition = 'background 0.1s ease';
-    body.style.background = '#FF0000';
-    setTimeout(() => {
-        const current = intervals[currentInterval];
-        body.className = current ? current.type : '';
-    }, 500);
-}
+            currentInterval++;
+            if (currentInterval >= intervals.length) {
+                clearInterval(timer);
+                triggerGoodJobMessage();  // Показать сообщение
+                alert('Workout Complete!');
+                resetTimer();
+                return;
+            }
+            timeRemaining = intervals[currentInterval].time;
+            updateDisplay();
+        }
  
         function updateDisplay() {
             timeDisplay.textContent = timeRemaining;
