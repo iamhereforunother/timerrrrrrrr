@@ -114,15 +114,11 @@
         .controls button:hover {
             background: rgba(255, 255, 255, 0.2);
         }
-
-        /* Фоны для разных режимов */
         body.PREP { background-color: #2A3B8F; }
         body.WORK { background-color: #FF9F1C; }
         body.REST { background-color: #FF4444; }
-
-        /* Плавное появление и исчезновение сообщения "Good job" */
         .good-job {
-            position: absolute;
+            position: fixed;
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
@@ -131,18 +127,18 @@
             color: white;
             opacity: 0;
             visibility: hidden;
-            animation: fadeInOut 3s forwards;
             z-index: 1001;
         }
-
+        .good-job.show {
+            animation: fadeInOut 3s forwards;
+            visibility: visible;
+        }
         @keyframes fadeInOut {
-            0% { opacity: 0; visibility: visible; }
+            0% { opacity: 0; }
             20% { opacity: 1; }
             80% { opacity: 1; }
-            100% { opacity: 0; visibility: hidden; }
+            100% { opacity: 0; }
         }
-
-        /* Стиль для overlay */
         #overlay {
             position: fixed;
             top: 0;
@@ -191,6 +187,7 @@
     </div>
 
     <div id="overlay"></div>
+    <div class="good-job" id="goodJobMessage">Good job bro! 🤾🏻‍♂️💪🏼</div>
 
     <script>
         const form = document.getElementById('timerForm');
@@ -203,6 +200,7 @@
         const body = document.body;
         const repeatsLeft = document.getElementById('repeatsLeft');
         const overlay = document.getElementById('overlay');
+        const goodJobMessage = document.getElementById('goodJobMessage');
         let intervals = [];
         let currentInterval = 0;
         let timeRemaining = 0;
@@ -212,39 +210,22 @@
 
         form.addEventListener('submit', (e) => {
             e.preventDefault();
-            const prepTime = +document.getElementById('prepTime').value;
-            const workTime = +document.getElementById('workTime').value;
-            const restTime = +document.getElementById('restTime').value;
-            const repeats = +document.getElementById('repeats').value;
-
-            intervals = [];
-            for (let i = 0; i < repeats; i++) {
-                intervals.push({ type: 'PREP', time: prepTime });
-                intervals.push({ type: 'WORK', time: workTime });
-                intervals.push({ type: 'REST', time: restTime });
-            }
-
-            currentInterval = 0;
-            timeRemaining = intervals[currentInterval].time;
+            setupIntervals();
             startTimer();
             form.style.display = 'none';
             timerScreen.style.display = 'block';
-            updateDisplay();
         });
 
-        function startTimer() {
-            clearInterval(timer);
-            timer = setInterval(() => {
-                if (!isPaused) {
-                    timeRemaining--;
-                    updateProgress();
-                    if (timeRemaining < 0) {
-                        audio.play();
-                        if (navigator.vibrate) navigator.vibrate([200]);
-                        nextInterval();
-                    } else updateDisplay();
-                }
-            }, 1000);
+        function setupIntervals() {
+            const prepTime = +prepTime.value;
+            const workTime = +workTime.value;
+            const restTime = +restTime.value;
+            const repeats = +repeats.value;
+            intervals = Array(repeats).fill([
+                { type: 'PREP', time: prepTime },
+                { type: 'WORK', time: workTime },
+                { type: 'REST', time: restTime }
+            ]).flat();
         }
     </script>
 </body>
