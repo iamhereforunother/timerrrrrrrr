@@ -261,15 +261,11 @@
         }
  
         function nextInterval() {
-    const current = intervals[currentInterval];
-    
-    if (current && current.type === 'WORK') {
-        audio.play();  // Сигнал по окончанию WORK
-        if (navigator.vibrate) {
-            navigator.vibrate([300, 100, 300]);  // Вибрация для эффекта
-        }
-        flashBackground();  // Визуальный сигнал
+    audio.play();  // Сигнал после каждого интервала
+    if (navigator.vibrate) {
+        navigator.vibrate([300, 100, 300]);  // Вибрация
     }
+    flashBackground();  // Визуальный сигнал
 
     currentInterval++;
     if (currentInterval >= intervals.length) {
@@ -287,7 +283,8 @@ function flashBackground() {
     body.style.transition = 'background 0.1s ease';
     body.style.background = '#FF0000';
     setTimeout(() => {
-        body.style.background = intervals[currentInterval]?.type === 'WORK' ? '#FF9F1C' : '#121212';
+        const current = intervals[currentInterval];
+        body.className = current ? current.type : '';
     }, 500);
 }
  
