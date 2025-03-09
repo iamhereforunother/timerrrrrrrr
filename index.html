@@ -298,13 +298,18 @@
     stopBtn.addEventListener('click', resetTimer);
 
     function resetTimer() {
-        form.style.display = 'block';
-        timerScreen.style.display = 'none';
-        clearInterval(timer);
-        form.reset();
-        isPaused = false;
-        pauseBtn.textContent = 'Pause';
-    }
+    form.style.display = 'flex'; // Убедимся, что форма корректно возвращает свои стили
+    form.style.maxWidth = '400px';
+    form.style.padding = '30px';
+    
+    timerScreen.style.display = 'none';
+    clearInterval(timer);
+    form.reset();
+    isPaused = false;
+    pauseBtn.textContent = 'Pause';
+    body.className = ''; // Убираем классы режимов, возвращая фон к #121212
+    body.style.backgroundColor = '#121212';
+}
 
     function playSound() {
         audio.currentTime = 0; // Чтобы звук мог воспроизводиться несколько раз подряд
