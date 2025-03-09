@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+ <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -114,27 +114,12 @@
         .controls button:hover {
             background: rgba(255, 255, 255, 0.2);
         }
-
-        /* Стиль для картинки */
-        .image-container {
-            width: 100%;
-            max-width: 350px;
-            margin: 20px auto;
-            border-radius: 12px;
-            overflow: hidden;
-            box-shadow: 0 30px 60px rgba(0, 0, 0, 0.5);
-        }
-        .image-container img {
-            width: 100%;
-            height: auto;
-            display: block;
-        }
-
+ 
         /* Фоны для разных режимов */
         body.PREP { background-color: #2A3B8F; }
         body.WORK { background-color: #FF9F1C; }
         body.REST { background-color: #FF4444; }
-
+ 
         /* Плавное появление и исчезновение сообщения "Good job" */
         .good-job {
             position: absolute;
@@ -148,7 +133,7 @@
             visibility: hidden;
             animation: fadeInOut 3s forwards;
         }
-
+ 
         @keyframes fadeInOut {
             0% {
                 opacity: 0;
@@ -165,7 +150,7 @@
                 visibility: hidden;
             }
         }
-
+ 
         /* Стиль для overlay */
         #overlay {
             position: fixed;
@@ -213,11 +198,6 @@
             <button id="stopBtn">Stop</button>
         </div>
     </div>
-
-    <!-- Картинка под меню -->
-    <div class="image-container" id="imageContainer">
-        <img src="https://i.pinimg.com/736x/1f/0f/5d/1f0f5d4bf16a8570cda3cff4674578e9.jpg" alt="Image">
-    </div>
  
     <div id="overlay"></div>  <!-- Элемент для затемнения -->
  
@@ -232,7 +212,6 @@
         const body = document.body;
         const repeatsLeft = document.getElementById('repeatsLeft');
         const overlay = document.getElementById('overlay');  // Элемент для overlay
-        const imageContainer = document.getElementById('imageContainer'); // Картинка
         let intervals = [];
         let currentInterval = 0;
         let timeRemaining = 0;
@@ -332,6 +311,15 @@
             goodJobMessage.classList.add('good-job');
             goodJobMessage.textContent = 'Good job bro! 🤾🏻‍♂️💪🏼';
             document.body.appendChild(goodJobMessage);
+ 
+            // Показываем overlay
+            overlay.style.display = 'block';
+ 
+            // Убираем сообщение и затемнение после завершения анимации
+            setTimeout(() => {
+                goodJobMessage.remove();
+                overlay.style.display = 'none';
+            }, 3000);  // Сообщение исчезает через 3 секунды
         }
     </script>
 </body>
