@@ -1,342 +1,297 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ru">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Interval Timer</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&display=swap" rel="stylesheet">
-    <style>
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-            font-family: 'Arial', sans-serif;
-        }
-        body {
-            background: #121212;
-            color: white;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            flex-direction: column;
-            gap: 30px;
-            padding: 20px;
-            transition: background 0.5s ease;
-        }
-        h1 {
-            font-family: 'Bebas Neue', sans-serif;
-            font-size: 3rem;
-        }
-        form {
-            background: #1e1e1e;
-            padding: 30px;
-            border-radius: 12px;
-            max-width: 400px;
-            width: 100%;
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
-            transition: all 0.3s ease; /* Плавная смена размеров формы */
-        }
-        label, input {
-            font-size: 1.2rem;
-        }
-        input {
-            padding: 10px;
-            border: none;
-            border-radius: 8px;
-            background: #333;
-            color: white;
-        }
-        button {
-            font-family: 'Bebas Neue', sans-serif;
-            padding: 12px;
-            font-size: 1.5rem;
-            background: #28A745;
-            color: white;
-            border: none;
-            border-radius: 8px;
-            cursor: pointer;
-            transition: background 0.3s ease;
-        }
-        button:hover {
-            background: #218838;
-        }
-        .timer {
-            display: none;
-            text-align: center;
-            padding: 30px;
-            background: #1e1e1e;
-            border-radius: 12px;
-            max-width: 400px;
-            width: 100%;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
-        }
-        .time {
-            font-size: 5rem;
-            font-family: 'Impact', sans-serif;
-            margin-bottom: 10px;
-        }
-        .status {
-            font-size: 2rem;
-            font-family: 'Bebas Neue', sans-serif;
-        }
-        .progress-bar {
-            width: 100%;
-            height: 10px;
-            background-color: #333;
-            border-radius: 8px;
-            margin: 20px 0;
-        }
-        .progress {
-            height: 100%;
-            width: 0;
-            border-radius: 8px;
-            background: #28A745;
-            transition: width 0.5s ease;
-        }
-        .controls {
-            display: flex;
-            gap: 20px;
-            justify-content: center;
-        }
-        .controls button {
-            font-family: 'Bebas Neue', sans-serif;
-            padding: 10px 20px;
-            font-size: 1.5rem;
-            border: 2px solid white;
-            background: transparent;
-            color: white;
-            cursor: pointer;
-            transition: background 0.3s ease;
-        }
-        .controls button:hover {
-            background: rgba(255, 255, 255, 0.2);
-        }
- 
-        /* Фоны для разных режимов */
-        body.PREP { background-color: #2A3B8F; }
-        body.WORK { background-color: #FF9F1C; }
-        body.REST { background-color: #FF4444; }
- 
-        /* Плавное появление и исчезновение сообщения "Good job" */
-        .good-job {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            font-family: 'Bebas Neue', sans-serif;
-            font-size: 3rem;
-            color: white;
-            opacity: 0;
-            visibility: hidden;
-            animation: fadeInOut 3s forwards;
-        }
- 
-        @keyframes fadeInOut {
-            0% {
-                opacity: 0;
-                visibility: visible;
-            }
-            20% {
-                opacity: 1;
-            }
-            80% {
-                opacity: 1;
-            }
-            100% {
-                opacity: 0;
-                visibility: hidden;
-            }
-        }
- 
-        /* Стиль для overlay */
-        #overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: rgba(0, 0, 0, 0.5);  /* Полупрозрачный черный */
-            z-index: 1000;
-            display: none;
-        }
-    </style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Interval Timer</title>
+  <style>
+    /* Общие стили */
+    * {
+      box-sizing: border-box;
+      margin: 0; padding: 0;
+      font-family: 'Arial', sans-serif;
+    }
+    body {
+      background: #121212;
+      color: #fff;
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      height: 100vh; gap: 30px; padding: 20px;
+      transition: background 0.5s ease;
+    }
+    h1 {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 3rem;
+    }
+    /* Форма */
+    form {
+      background: #1e1e1e;
+      padding: 30px;
+      border-radius: 12px;
+      max-width: 400px; width: 100%;
+      display: flex; flex-direction: column; gap: 15px;
+    }
+    label, input {
+      font-size: 1.2rem;
+    }
+    input {
+      padding: 10px;
+      border: none; border-radius: 8px;
+      background: #333; color: #fff;
+    }
+    button {
+      font-family: 'Bebas Neue', sans-serif;
+      padding: 12px; font-size: 1.5rem;
+      background: #28A745; color: #fff;
+      border: none; border-radius: 8px;
+      cursor: pointer; transition: background 0.3s ease;
+    }
+    button:hover:not([disabled]) {
+      background: #218838;
+    }
+    button[disabled] {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+    /* Таймер */
+    .timer {
+      display: none;
+      background: #1e1e1e;
+      padding: 30px;
+      border-radius: 12px;
+      max-width: 400px; width: 100%;
+      text-align: center;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+    }
+    .time {
+      font-size: 5rem;
+      font-family: 'Impact', sans-serif;
+      margin-bottom: 10px;
+    }
+    .status {
+      font-size: 2rem;
+      font-family: 'Bebas Neue', sans-serif;
+    }
+    .progress-bar {
+      width: 100%; height: 10px;
+      background: #333; border-radius: 8px;
+      margin: 20px 0;
+      overflow: hidden;
+    }
+    .progress {
+      height: 100%; width: 0%;
+      background: #28A745; transition: width 0.5s ease;
+    }
+    .controls {
+      display: flex; gap: 20px; justify-content: center;
+    }
+    /* Фоны для режимов */
+    body.PREP  { background-color: #2A3B8F; }
+    body.WORK  { background-color: #FF9F1C; }
+    body.REST  { background-color: #FF4444; }
+    /* Good job overlay */
+    #overlay {
+      position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0,0,0,0.5);
+      display: none; z-index: 1000;
+    }
+    .good-job {
+      position: fixed; top: 50%; left: 50%;
+      transform: translate(-50%, -50%);
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 3rem; color: #fff;
+      opacity: 0; visibility: hidden;
+      z-index: 1001;
+      animation: fadeInOut 3s forwards;
+    }
+    @keyframes fadeInOut {
+      0%   { opacity: 0; visibility: visible; }
+      20%  { opacity: 1; }
+      80%  { opacity: 1; }
+      100% { opacity: 0; visibility: hidden; }
+    }
+  </style>
 </head>
 <body>
-    <h1>Interval Timer</h1>
- 
-    <form id="timerForm">
-        <label for="prepTime">Preparation Time (seconds):</label>
-        <input type="number" id="prepTime" value="10" min="1">
- 
-        <label for="workTime">Work Time (seconds):</label>
-        <input type="number" id="workTime" value="30" min="1">
- 
-        <label for="restTime">Rest Time (seconds):</label>
-        <input type="number" id="restTime" value="15" min="1">
- 
-        <label for="repeats">Repeats:</label>
-        <input type="number" id="repeats" value="3" min="1">
- 
-        <button type="submit">Start</button>
-    </form>
- 
-    <div class="timer">
-        <div class="time" id="timeDisplay">10</div>
-        <div class="status" id="intervalStatus">PREP</div>
- 
-        <p id="repeatsLeft">Repeats Left: 3</p>
- 
-        <div class="progress-bar">
-            <div class="progress" id="progressBar"></div>
-        </div>
- 
-        <div class="controls">
-            <button id="pauseBtn">Pause</button>
-            <button id="stopBtn">Stop</button>
-        </div>
+  <h1>Interval Timer</h1>
+
+  <form id="timerForm">
+    <label for="prepTime">Preparation Time (seconds):</label>
+    <input type="number" id="prepTime" value="10" min="1" required />
+
+    <label for="workTime">Work Time (seconds):</label>
+    <input type="number" id="workTime" value="30" min="1" required />
+
+    <label for="restTime">Rest Time (seconds):</label>
+    <input type="number" id="restTime" value="15" min="1" required />
+
+    <label for="repeats">Repeats:</label>
+    <input type="number" id="repeats" value="3" min="1" required />
+
+    <button type="submit" id="startBtn">Start</button>
+  </form>
+
+  <div class="timer" id="timerScreen" aria-live="polite">
+    <div class="time" id="timeDisplay">0</div>
+    <div class="status" id="intervalStatus">—</div>
+    <p id="repeatsLeft">Repeats Left: 0</p>
+    <div class="progress-bar">
+      <div class="progress" id="progressBar"></div>
     </div>
- 
-    <div id="overlay"></div>  <!-- Элемент для затемнения -->
- 
-    <script>
-    const form = document.getElementById('timerForm');
-    const timerScreen = document.querySelector('.timer');
-    const timeDisplay = document.getElementById('timeDisplay');
-    const intervalStatus = document.getElementById('intervalStatus');
-    const progressBar = document.getElementById('progressBar');
-    const pauseBtn = document.getElementById('pauseBtn');
-    const stopBtn = document.getElementById('stopBtn');
-    const body = document.body;
-    const repeatsLeft = document.getElementById('repeatsLeft');
-    const overlay = document.getElementById('overlay'); // Затемнение фона
-    let intervals = [];
-    let currentInterval = 0;
-    let timeRemaining = 0;
-    let timer = null;
-    let isPaused = false;
-    let audio = new Audio('assets/milestone.mp3'); // Поменяй на свой путь к звуку
+    <div class="controls">
+      <button id="pauseBtn" disabled>Pause</button>
+      <button id="stopBtn" disabled>Stop</button>
+    </div>
+  </div>
 
-    form.addEventListener('submit', (e) => {
+  <div id="overlay"></div>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      // Элементы
+      const form         = document.getElementById('timerForm');
+      const timerScreen  = document.getElementById('timerScreen');
+      const timeDisplay  = document.getElementById('timeDisplay');
+      const statusDisplay= document.getElementById('intervalStatus');
+      const repeatsLeft  = document.getElementById('repeatsLeft');
+      const progressBar  = document.getElementById('progressBar');
+      const pauseBtn     = document.getElementById('pauseBtn');
+      const stopBtn      = document.getElementById('stopBtn');
+      const overlay      = document.getElementById('overlay');
+
+      // Аудио
+      const audio = new Audio('assets/milestone.mp3');
+      audio.preload = 'auto';
+      let audioReady = false;
+      audio.addEventListener('canplaythrough', () => audioReady = true);
+
+      // Состояние
+      let intervals = [], current = 0, remaining = 0, timerID = null, paused = false;
+
+      // Обработчики
+      form.addEventListener('submit', e => {
         e.preventDefault();
-        const prepTime = +document.getElementById('prepTime').value;
-        const workTime = +document.getElementById('workTime').value;
-        const restTime = +document.getElementById('restTime').value;
-        const repeats = +document.getElementById('repeats').value;
-
-        intervals = [];
-        for (let i = 0; i < repeats; i++) {
-            intervals.push({ type: 'PREP', time: prepTime });
-            intervals.push({ type: 'WORK', time: workTime });
-            intervals.push({ type: 'REST', time: restTime });
+        if (!audioReady) {
+          alert('Подождите, звук ещё загружается.');
+          return;
         }
-
-        currentInterval = 0;
-        timeRemaining = intervals[currentInterval].time;
-        startTimer();
+        initIntervals();
         form.style.display = 'none';
         timerScreen.style.display = 'block';
-        updateDisplay();
-    });
+        pauseBtn.disabled = false;
+        stopBtn.disabled  = false;
+        startLoop();
+      });
 
-    function startTimer() {
-        clearInterval(timer);
-        timer = setInterval(() => {
-            if (!isPaused) {
-                timeRemaining--;
-                updateProgress();
-                if (timeRemaining < 0) {
-                    playSound(); // Звук при конце каждого интервала
-                    if (navigator.vibrate) {
-                        navigator.vibrate([200]);
-                    }
-                    nextInterval();
-                } else {
-                    updateDisplay();
-                }
-            }
-        }, 1000);
-    }
+      pauseBtn.addEventListener('click', () => {
+        paused = !paused;
+        pauseBtn.textContent = paused ? 'Resume' : 'Pause';
+      });
 
-    function nextInterval() {
-        currentInterval++;
-        if (currentInterval >= intervals.length) {
-            clearInterval(timer);
-            triggerGoodJobMessage();
-            alert('Workout Complete!');
-            resetTimer();
-            return;
+      stopBtn.addEventListener('click', reset);
+
+      // Функции
+      function initIntervals() {
+        const prep = +document.getElementById('prepTime').value;
+        const work = +document.getElementById('workTime').value;
+        const rest = +document.getElementById('restTime').value;
+        const reps = +document.getElementById('repeats').value;
+
+        intervals = [];
+        for (let i = 0; i < reps; i++) {
+          intervals.push({ type: 'PREP', time: prep });
+          intervals.push({ type: 'WORK', time: work });
+          intervals.push({ type: 'REST', time: rest });
         }
-        timeRemaining = intervals[currentInterval].time;
-        updateDisplay();
-    }
+        current   = 0;
+        remaining = intervals[0].time;
+        updateUI();
+      }
 
-    function updateDisplay() {
-        timeDisplay.textContent = timeRemaining;
-        const current = intervals[currentInterval];
-        intervalStatus.textContent = current.type;
-        body.className = current.type;
+      function startLoop() {
+        clearInterval(timerID);
+        paused = false;
+        timerID = setInterval(() => {
+          if (paused) return;
+          remaining--;
+          updateProgress();
+          if (remaining < 0) {
+            playAudio();
+            nextInterval();
+          } else {
+            updateUI();
+          }
+        }, 1000);
+      }
+
+      function nextInterval() {
+        current++;
+        if (current >= intervals.length) {
+          finish();
+          return;
+        }
+        remaining = intervals[current].time;
+        updateUI();
+      }
+
+      function updateUI() {
+        const inst = intervals[current];
+        timeDisplay.textContent    = remaining;
+        statusDisplay.textContent  = inst.type;
+        document.body.className    = inst.type;
+        const leftReps = Math.ceil((intervals.length - current) / 3);
+        repeatsLeft.textContent    = `Repeats Left: ${leftReps}`;
         updateProgress();
+      }
 
-        let remainingRepeats = Math.ceil((intervals.length - currentInterval) / 3);
-        repeatsLeft.textContent = `Repeats Left: ${remainingRepeats}`;
-    }
+      function updateProgress() {
+        const total = intervals[current].time;
+        const pct   = Math.max(0, Math.min(100, (total - remaining)/total*100));
+        progressBar.style.width = pct + '%';
+      }
 
-    function updateProgress() {
-        const totalTime = intervals[currentInterval].time;
-        const progress = ((totalTime - timeRemaining) / totalTime) * 100;
-        progressBar.style.width = `${progress}%`;
-    }
+      function playAudio() {
+        audio.currentTime = 0;
+        audio.play().catch(console.error);
+        if (navigator.vibrate) navigator.vibrate(200);
+      }
 
-    pauseBtn.addEventListener('click', () => {
-        isPaused = !isPaused;
-        pauseBtn.textContent = isPaused ? 'Resume' : 'Pause';
+      function finish() {
+        clearInterval(timerID);
+        showGoodJob();
+        // Делаем паузу, чтобы увидеть сообщение, а потом сбрасываем всё
+        setTimeout(reset, 3500);
+      }
+
+      function showGoodJob() {
+        // Если старые сообщения остались в DOM — удаляем
+        document.querySelectorAll('.good-job').forEach(el => el.remove());
+        overlay.style.display = 'block';
+        const msg = document.createElement('div');
+        msg.className = 'good-job';
+        msg.textContent = 'Good job bro! 🤾🏻‍♂️💪🏼';
+        document.body.appendChild(msg);
+      }
+
+      function reset() {
+        clearInterval(timerID);
+        // Останавливаем и сбрасываем звук
+        audio.pause();
+        audio.currentTime = 0;
+        // Убираем все динамические надписи
+        document.querySelectorAll('.good-job').forEach(el => el.remove());
+        // Возвращаем начальное состояние
+        form.reset();
+        form.style.display        = 'flex';
+        timerScreen.style.display = 'none';
+        pauseBtn.disabled         = true;
+        stopBtn.disabled          = true;
+        pauseBtn.textContent      = 'Pause';
+        // Сбрасываем фон и прогресс
+        document.body.className   = '';
+        overlay.style.display     = 'none';
+        progressBar.style.width   = '0';
+      }
     });
-
-    stopBtn.addEventListener('click', resetTimer);
-
-    function resetTimer() {
-    form.style.display = 'flex'; // Убедимся, что форма корректно возвращает свои стили
-    form.style.maxWidth = '400px';
-    form.style.padding = '30px';
-    
-    timerScreen.style.display = 'none';
-    clearInterval(timer);
-    form.reset();
-    isPaused = false;
-    pauseBtn.textContent = 'Pause';
-    body.className = ''; // Убираем классы режимов, возвращая фон к #121212
-    body.style.backgroundColor = '#121212';
-}
-
-    function playSound() {
-        audio.currentTime = 0; // Чтобы звук мог воспроизводиться несколько раз подряд
-        audio.play().catch(err => console.error('Audio play failed:', err));
-    }
-
-    function triggerGoodJobMessage() {
-        overlay.style.display = 'block'; // Показываем затемнение
-
-        const goodJobMessage = document.createElement('div');
-        goodJobMessage.classList.add('good-job');
-        goodJobMessage.textContent = 'Good job bro! 🤾🏻‍♂️💪🏼';
-        document.body.appendChild(goodJobMessage);
-
-        // Размещаем текст выше оверлея
-        goodJobMessage.style.position = 'fixed';
-        goodJobMessage.style.top = '50%';
-        goodJobMessage.style.left = '50%';
-        goodJobMessage.style.transform = 'translate(-50%, -50%)';
-        goodJobMessage.style.zIndex = '1001'; // Поверх overlay
-
-        setTimeout(() => {
-            goodJobMessage.remove();
-            overlay.style.display = 'none';
-        }, 3000); // Сообщение исчезает через 3 секунды
-    }
-</script>
+  </script>
 </body>
 </html>
