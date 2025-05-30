@@ -145,153 +145,142 @@
   </div>
 
   <div id="overlay"></div>
-  <script>
-    document.addEventListener('DOMContentLoaded', () => {
-      // Элементы
-      const form         = document.getElementById('timerForm');
-      const timerScreen  = document.getElementById('timerScreen');
-      const timeDisplay  = document.getElementById('timeDisplay');
-      const statusDisplay= document.getElementById('intervalStatus');
-      const repeatsLeft  = document.getElementById('repeatsLeft');
-      const progressBar  = document.getElementById('progressBar');
-      const pauseBtn     = document.getElementById('pauseBtn');
-      const stopBtn      = document.getElementById('stopBtn');
-      const overlay      = document.getElementById('overlay');
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  // Элементы
+  const form         = document.getElementById('timerForm');
+  const timerScreen  = document.getElementById('timerScreen');
+  const timeDisplay  = document.getElementById('timeDisplay');
+  const statusDisplay= document.getElementById('intervalStatus');
+  const repeatsLeft  = document.getElementById('repeatsLeft');
+  const progressBar  = document.getElementById('progressBar');
+  const pauseBtn     = document.getElementById('pauseBtn');
+  const stopBtn      = document.getElementById('stopBtn');
+  const overlay      = document.getElementById('overlay');
 
-      // Аудио
-      const audio = new Audio('assets/milestone.mp3');
-      audio.preload = 'auto';
-      let audioReady = false;
-      audio.addEventListener('canplaythrough', () => audioReady = true);
+  // Аудио
+  const audio = new Audio('assets/milestone.mp3');
+  audio.preload = 'auto';
 
-      // Состояние
-      let intervals = [], current = 0, remaining = 0, timerID = null, paused = false;
+  // Состояние
+  let intervals = [];
+  let current   = 0;
+  let remaining = 0;
+  let timerID   = null;
+  let paused    = false;
 
-      // Обработчики
-      form.addEventListener('submit', e => {
-        e.preventDefault();
-        if (!audioReady) {
-          alert('Подождите, звук ещё загружается.');
-          return;
-        }
-        initIntervals();
-        form.style.display = 'none';
-        timerScreen.style.display = 'block';
-        pauseBtn.disabled = false;
-        stopBtn.disabled  = false;
-        startLoop();
-      });
+  // Обработчики
+  form.addEventListener('submit', e => {
+    e.preventDefault();
+    initIntervals();
+    form.style.display = 'none';
+    timerScreen.style.display = 'block';
+    pauseBtn.disabled = false;
+    stopBtn.disabled  = false;
+    startLoop();
+  });
 
-      pauseBtn.addEventListener('click', () => {
-        paused = !paused;
-        pauseBtn.textContent = paused ? 'Resume' : 'Pause';
-      });
+  pauseBtn.addEventListener('click', () => {
+    paused = !paused;
+    pauseBtn.textContent = paused ? 'Resume' : 'Pause';
+  });
 
-      stopBtn.addEventListener('click', reset);
+  stopBtn.addEventListener('click', reset);
 
-      // Функции
-      function initIntervals() {
-        const prep = +document.getElementById('prepTime').value;
-        const work = +document.getElementById('workTime').value;
-        const rest = +document.getElementById('restTime').value;
-        const reps = +document.getElementById('repeats').value;
+  // Функции
+  function initIntervals() {
+    const prep = +document.getElementById('prepTime').value;
+    const work = +document.getElementById('workTime').value;
+    const rest = +document.getElementById('restTime').value;
+    const reps = +document.getElementById('repeats').value;
 
-        intervals = [];
-        for (let i = 0; i < reps; i++) {
-          intervals.push({ type: 'PREP', time: prep });
-          intervals.push({ type: 'WORK', time: work });
-          intervals.push({ type: 'REST', time: rest });
-        }
-        current   = 0;
-        remaining = intervals[0].time;
+    intervals = [];
+    for (let i = 0; i < reps; i++) {
+      intervals.push({ type: 'PREP', time: prep });
+      intervals.push({ type: 'WORK', time: work });
+      intervals.push({ type: 'REST', time: rest });
+    }
+    current   = 0;
+    remaining = intervals[0].time;
+    updateUI();
+  }
+
+  function startLoop() {
+    clearInterval(timerID);
+    paused = false;
+    timerID = setInterval(() => {
+      if (paused) return;
+      remaining--;
+      updateProgress();
+      if (remaining < 0) {
+        playAudio();
+        nextInterval();
+      } else {
         updateUI();
       }
+    }, 1000);
+  }
 
-      function startLoop() {
-        clearInterval(timerID);
-        paused = false;
-        timerID = setInterval(() => {
-          if (paused) return;
-          remaining--;
-          updateProgress();
-          if (remaining < 0) {
-            playAudio();
-            nextInterval();
-          } else {
-            updateUI();
-          }
-        }, 1000);
-      }
+  function nextInterval() {
+    current++;
+    if (current >= intervals.length) {
+      finish();
+      return;
+    }
+    remaining = intervals[current].time;
+    updateUI();
+  }
 
-      function nextInterval() {
-        current++;
-        if (current >= intervals.length) {
-          finish();
-          return;
-        }
-        remaining = intervals[current].time;
-        updateUI();
-      }
+  function updateUI() {
+    const inst = intervals[current];
+    timeDisplay.textContent    = remaining;
+    statusDisplay.textContent  = inst.type;
+    document.body.className    = inst.type;
+    const leftReps = Math.ceil((intervals.length - current) / 3);
+    repeatsLeft.textContent    = `Repeats Left: ${leftReps}`;
+    updateProgress();
+  }
 
-      function updateUI() {
-        const inst = intervals[current];
-        timeDisplay.textContent    = remaining;
-        statusDisplay.textContent  = inst.type;
-        document.body.className    = inst.type;
-        const leftReps = Math.ceil((intervals.length - current) / 3);
-        repeatsLeft.textContent    = `Repeats Left: ${leftReps}`;
-        updateProgress();
-      }
+  function updateProgress() {
+    const total = intervals[current].time;
+    const pct   = Math.max(0, Math.min(100, (total - remaining)/total*100));
+    progressBar.style.width = pct + '%';
+  }
 
-      function updateProgress() {
-        const total = intervals[current].time;
-        const pct   = Math.max(0, Math.min(100, (total - remaining)/total*100));
-        progressBar.style.width = pct + '%';
-      }
+  function playAudio() {
+    audio.currentTime = 0;
+    audio.play().catch(console.error);
+    if (navigator.vibrate) navigator.vibrate(200);
+  }
 
-      function playAudio() {
-        audio.currentTime = 0;
-        audio.play().catch(console.error);
-        if (navigator.vibrate) navigator.vibrate(200);
-      }
+  function finish() {
+    clearInterval(timerID);
+    showGoodJob();
+    setTimeout(reset, 3500);
+  }
 
-      function finish() {
-        clearInterval(timerID);
-        showGoodJob();
-        // Делаем паузу, чтобы увидеть сообщение, а потом сбрасываем всё
-        setTimeout(reset, 3500);
-      }
+  function showGoodJob() {
+    overlay.style.display = 'block';
+    const msg = document.createElement('div');
+    msg.className = 'good-job';
+    msg.textContent = 'Good job bro! 🤾🏻‍♂️💪🏼';
+    document.body.appendChild(msg);
+  }
 
-      function showGoodJob() {
-        // Если старые сообщения остались в DOM — удаляем
-        document.querySelectorAll('.good-job').forEach(el => el.remove());
-        overlay.style.display = 'block';
-        const msg = document.createElement('div');
-        msg.className = 'good-job';
-        msg.textContent = 'Good job bro! 🤾🏻‍♂️💪🏼';
-        document.body.appendChild(msg);
-      }
-
-      function reset() {
-        clearInterval(timerID);
-        // Останавливаем и сбрасываем звук
-        audio.pause();
-        audio.currentTime = 0;
-        // Убираем все динамические надписи
-        document.querySelectorAll('.good-job').forEach(el => el.remove());
-        // Возвращаем начальное состояние
-        form.reset();
-        form.style.display        = 'flex';
-        timerScreen.style.display = 'none';
-        pauseBtn.disabled         = true;
-        stopBtn.disabled          = true;
-        pauseBtn.textContent      = 'Pause';
-        // Сбрасываем фон и прогресс
-        document.body.className   = '';
-        overlay.style.display     = 'none';
-        progressBar.style.width   = '0';
-      }
-    });
-  </script>
-</body>
-</html>
+  function reset() {
+    clearInterval(timerID);
+    audio.pause();
+    audio.currentTime = 0;
+    document.querySelectorAll('.good-job').forEach(el => el.remove());
+    form.reset();
+    form.style.display       = 'flex';
+    timerScreen.style.display= 'none';
+    pauseBtn.disabled        = true;
+    stopBtn.disabled         = true;
+    pauseBtn.textContent     = 'Pause';
+    document.body.className  = '';
+    overlay.style.display    = 'none';
+    progressBar.style.width  = '0';
+  }
+});
+</script>
