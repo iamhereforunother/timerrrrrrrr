@@ -5,12 +5,28 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Interval Timer</title>
   
-    <link rel="icon" type="image/png" href="favicon-96x96.png" sizes="96x96" />
-  <link rel="icon" type="image/svg+xml" href="favicon.svg" />
+  <!-- 1. Стандартный favicon.ico (fallback для старых браузеров) -->
   <link rel="shortcut icon" href="favicon.ico" />
+
+  <!-- 2. PNG‑версии под разные размеры (современные браузеры) -->
+  <link rel="icon" type="image/png" sizes="16x16" href="favicon-16x16.png" />
+  <link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png" />
+  <link rel="icon" type="image/png" sizes="96x96" href="favicon-96x96.png" />
+
+  <!-- 3. Векторный SVG‑favicon (Chrome, Firefox, Safari) -->
+  <link rel="icon" type="image/svg+xml" href="favicon.svg" />
+
+  <!-- 4. Apple Touch Icon (iOS Safari «Избранное» и «Домой») -->
   <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png" />
   <meta name="apple-mobile-web-app-title" content="Timerrrrrrrr" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+
+  <!-- 5. Safari Pinned Tab (macOS Safari «Pinned Tabs») -->
+  <link rel="mask-icon" href="safari-pinned-tab.svg" color="#28A745" />
+
+  <!-- 6. Web App Manifest (Android / PWA) -->
   <link rel="manifest" href="site.webmanifest" />
+  <meta name="theme-color" content="#121212" />
   
   <style>
     /* Общие стили */
