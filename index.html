@@ -4,6 +4,14 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Interval Timer</title>
+  
+    <link rel="icon" type="image/png" href="favicon-96x96.png" sizes="96x96" />
+  <link rel="icon" type="image/svg+xml" href="favicon.svg" />
+  <link rel="shortcut icon" href="favicon.ico" />
+  <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png" />
+  <meta name="apple-mobile-web-app-title" content="Timerrrrrrrr" />
+  <link rel="manifest" href="site.webmanifest" />
+  
   <style>
     /* Общие стили */
     * {
@@ -90,27 +98,40 @@
     body.WORK  { background-color: #FF9F1C; }
     body.REST  { background-color: #FF4444; }
     /* Good job overlay */
-    #overlay {
-      position: fixed; top: 0; left: 0; right: 0; bottom: 0;
-      background: rgba(0,0,0,0.5);
-      display: none; z-index: 1000;
+ #overlay {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0,0,0,0.5);
+  /* подтягиваем overlay наверх */
+  display: none;
+  z-index: 1000;
+  /* чтобы текст не выпал за край, на случай очень узких экранов: */
+  overflow-x: hidden;
+
     }
-    .good-job {
-      position: fixed; top: 50%; left: 50%;
-      transform: translate(-50%, -50%);
-      font-family: 'Bebas Neue', sans-serif;
-      font-size: 3rem; color: #fff;
-      opacity: 0; visibility: hidden;
-      z-index: 1001;
-      animation: fadeInOut 3s forwards;
-    }
-      /* Иконки --*/
-  <link rel="icon" type="image/png" href="favicon-96x96.png" sizes="96x96" />
-  <link rel="icon" type="image/svg+xml" href="favicon.svg" />
-  <link rel="shortcut icon" href="favicon.ico" />
-  <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png" />
-  <meta name="apple-mobile-web-app-title" content="Timerrrrrrrr" />
-    }
+  .good-job {
+  position: fixed;
+  top: 50%; 
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-family: 'Bebas Neue', sans-serif;
+  
+  /* АДАПТИВНЫЙ РАЗМЕР ШРИФТА: 
+     от 1.5rem (минимум) до 3rem (максимум),
+     где базовая величина — 5vw (5% ширины экрана) */
+  font-size: clamp(1.5rem, 5vw, 3rem);
+  
+  /* Запретить перенос текста:
+     вся надпись — в одну линию */
+  white-space: nowrap;
+  
+  color: #fff;
+  opacity: 0;
+  visibility: hidden;
+  z-index: 1001;
+  animation: fadeInOut 3s forwards;
+}
+    
     
   <link rel="manifest" href="site.webmanifest" />
     @keyframes fadeInOut {
