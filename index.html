@@ -1,305 +1,350 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="ru">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Interval Timer — Liquid Glass</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Interval Timer</title>
+  
+  <!-- 1. Стандартный favicon.ico (fallback для старых браузеров) -->
+  <link rel="shortcut icon" href="favicon.ico" />
 
-  <meta name="theme-color" content="#0b0b0b">
+  <!-- 2. PNG‑версии под разные размеры (современные браузеры) -->
+  <link rel="icon" type="image/png" sizes="16x16" href="favicon-16x16.png" />
+  <link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png" />
+  <link rel="icon" type="image/png" sizes="96x96" href="favicon-96x96.png" />
 
-  <!-- Fonts -->
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&family=Playfair+Display:wght@600&display=swap" rel="stylesheet">
+  <!-- 3. Векторный SVG‑favicon (Chrome, Firefox, Safari) -->
+  <link rel="icon" type="image/svg+xml" href="favicon.svg" />
 
+  <!-- 4. Apple Touch Icon (iOS Safari «Избранное» и «Домой») -->
+  <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png" />
+  <meta name="apple-mobile-web-app-title" content="Timerrrrrrrr" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+
+  <!-- 5. Safari Pinned Tab (macOS Safari «Pinned Tabs») -->
+  <link rel="mask-icon" href="safari-pinned-tab.svg" color="#28A745" />
+
+  <!-- 6. Web App Manifest (Android / PWA) -->
+  <link rel="manifest" href="site.webmanifest" />
+  <meta name="theme-color" content="#121212" />
+  
   <style>
-    :root{
-      --bg-1: #07070a;
-      --bg-2: #0f1115;
-      --glass-1: rgba(255,255,255,0.04);
-      --glass-2: rgba(255,255,255,0.02);
-      --accent:  #4dd0e1; /* cyan */
-      --accent-2:#7b61ff; /* purple */
-      --muted: rgba(255,255,255,0.5);
-      --card-radius: 16px;
-      --glass-border: rgba(255,255,255,0.06);
-      --shadow: 0 10px 30px rgba(2,6,23,0.7);
+    /* Общие стили */
+    * {
+      box-sizing: border-box;
+      margin: 0; padding: 0;
+      font-family: 'Arial', sans-serif;
     }
-
-    /* Reset */
-    *{box-sizing:border-box}
-    html,body{height:100%}
-    body{
-      margin:0;
-      font-family:Inter, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial;
-      -webkit-font-smoothing:antialiased;
-      background: radial-gradient(1200px 600px at 10% 10%, rgba(71,58,255,0.08), transparent 8%),
-                  radial-gradient(900px 400px at 90% 90%, rgba(77,208,225,0.06), transparent 10%),
-                  linear-gradient(180deg,var(--bg-1),var(--bg-2));
-      color: #e6eef6;
-      display:flex;
-      align-items:center;justify-content:center;
-      padding:32px;
-      gap:28px;
-      min-height:100vh;
-      overflow:hidden;
+    body {
+      background: #121212;
+      color: #fff;
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      height: 100vh; gap: 30px; padding: 20px;
+      transition: background 0.5s ease;
     }
-
-    /* Animated liquid blobs in the background */
-    .blobs{
-      position:fixed;inset:0;z-index:0;pointer-events:none;mix-blend-mode:screen;filter:blur(60px) saturate(120%);
+    h1 {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 3rem;
     }
-    .blob{position:absolute;width:520px;height:520px;border-radius:50%;opacity:0.6}
-    .b1{left:-10%;top:-15%;background:linear-gradient(135deg,var(--accent),var(--accent-2));animation:move1 18s ease-in-out infinite}
-    .b2{right:-8%;bottom:-10%;width:420px;height:420px;background:linear-gradient(135deg,#ff6b9f,#ffb86b);animation:move2 22s ease-in-out infinite}
-    .b3{left:30%;bottom:-20%;width:360px;height:360px;background:linear-gradient(135deg,#6bffb8,#7be1ff);animation:move3 26s ease-in-out infinite}
-    @keyframes move1{0%{transform:translateY(0) scale(1)}50%{transform:translateY(30px) scale(1.08)}100%{transform:translateY(0) scale(1)}}
-    @keyframes move2{0%{transform:translateX(0) scale(1)}50%{transform:translateX(-30px) scale(1.05)}100%{transform:translateX(0) scale(1)}}
-    @keyframes move3{0%{transform:translateY(0) scale(1)}50%{transform:translateY(-18px) scale(.98)}100%{transform:translateY(0) scale(1)}}
-
-    /* Layout */
-    .wrap{position:relative;z-index:1;display:grid;grid-template-columns:420px 360px;gap:28px;align-items:start}
-    @media (max-width:900px){.wrap{grid-template-columns:1fr;max-width:520px;padding:0 20px}}
-
-    /* Glass card */
-    .card{
-      background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
-      border:1px solid var(--glass-border);
-      border-radius:var(--card-radius);
-      backdrop-filter: blur(12px) saturate(140%);
-      -webkit-backdrop-filter: blur(12px) saturate(140%);
-      box-shadow: var(--shadow);
-      padding:22px;
-      color:var(--muted);
+    /* Форма */
+    form {
+      background: #1e1e1e;
+      padding: 30px;
+      border-radius: 12px;
+      max-width: 400px; width: 100%;
+      display: flex; flex-direction: column; gap: 15px;
     }
-
-    /* Header */
-    header{display:flex;align-items:center;gap:12px;margin-bottom:8px}
-    .logo{
-      width:56px;height:56px;border-radius:12px;display:inline-grid;place-items:center;
-      background:linear-gradient(135deg, rgba(255,255,255,0.03), rgba(255,255,255,0.01));
-      border:1px solid rgba(255,255,255,0.04);
-      font-weight:800;color:transparent;-webkit-text-stroke: 0.6px rgba(255,255,255,0.12);
+    label, input {
+      font-size: 1.2rem;
     }
-    h1{font-family:'Playfair Display';font-size:20px;margin:0;color:#fff}
-    p.lead{margin:0;font-size:13px;color:var(--muted)}
-
-    /* Form */
-    form#timerForm{display:flex;flex-direction:column;gap:14px}
-    .row{display:flex;gap:12px}
-    label{font-size:12px;color:var(--muted);display:block;margin-bottom:6px}
-    input[type=number]{
-      width:100%;padding:12px;border-radius:10px;border:none;background:linear-gradient(180deg, rgba(255,255,255,0.01), rgba(255,255,255,0.005));color:#eaf6f8;font-size:15px;outline:none;
-      box-shadow: inset 0 -6px 12px rgba(0,0,0,0.25);
+    input {
+      padding: 10px;
+      border: none; border-radius: 8px;
+      background: #333; color: #fff;
     }
-    .small{flex:1}
-    .actions{display:flex;gap:12px;align-items:center}
-
-    /* Buttons */
-    .btn{
-      appearance:none;border:none;padding:12px 16px;border-radius:12px;font-weight:600;cursor:pointer;
-      background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));color:#e6f9fb;border:1px solid rgba(255,255,255,0.04);
-      transition:transform .12s ease, box-shadow .12s ease;
+    button {
+      font-family: 'Bebas Neue', sans-serif;
+      padding: 12px; font-size: 1.5rem;
+      background: #28A745; color: #fff;
+      border: none; border-radius: 8px;
+      cursor: pointer; transition: background 0.3s ease;
     }
-    .btn:active{transform:translateY(1px)}
-    .btn.primary{
-      background:linear-gradient(90deg,var(--accent),var(--accent-2));color:#031018;border:none;box-shadow:0 8px 30px rgba(77,208,225,0.08),0 4px 10px rgba(123,97,255,0.05);
+    button:hover:not([disabled]) {
+      background: #218838;
     }
-    .btn.ghost{background:transparent;border:1px dashed rgba(255,255,255,0.04);color:var(--muted)}
-
-    /* Timer panel */
-    .panel{display:flex;flex-direction:column;align-items:center;gap:12px;padding:28px}
-    .clock{
-      width:220px;height:220px;display:grid;place-items:center;border-radius:50%;
-      background: radial-gradient(circle at 30% 20%, rgba(255,255,255,0.02), rgba(255,255,255,0.00) 30%), rgba(255,255,255,0.02);
-      border:1px solid rgba(255,255,255,0.04);position:relative;overflow:visible;
-      box-shadow: inset 0 -12px 30px rgba(2,6,23,0.6), 0 20px 60px rgba(2,6,23,0.6);
+    button[disabled] {
+      opacity: 0.5;
+      cursor: not-allowed;
     }
-    .time-value{font-size:46px;font-weight:800;font-family:'Inter';color:#fff}
-    .status-pill{position:absolute;bottom:12px;left:50%;transform:translateX(-50%);padding:6px 12px;border-radius:999px;font-weight:700;font-size:12px;color:#081018;background:linear-gradient(90deg,var(--accent),var(--accent-2));}
+    /* Таймер */
+    .timer {
+      display: none;
+      background: #1e1e1e;
+      padding: 30px;
+      border-radius: 12px;
+      max-width: 400px; width: 100%;
+      text-align: center;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+    }
+    .time {
+      font-size: 5rem;
+      font-family: 'Impact', sans-serif;
+      margin-bottom: 10px;
+    }
+    .status {
+      font-size: 2rem;
+      font-family: 'Bebas Neue', sans-serif;
+    }
+    .progress-bar {
+      width: 100%; height: 10px;
+      background: #333; border-radius: 8px;
+      margin: 20px 0;
+      overflow: hidden;
+    }
+    .progress {
+      height: 100%; width: 0%;
+      background: #28A745; transition: width 0.5s ease;
+    }
+    .controls {
+      display: flex; gap: 20px; justify-content: center;
+    }
+    /* Фоны для режимов */
+    body.PREP  { background-color: #2A3B8F; }
+    body.WORK  { background-color: #FF9F1C; }
+    body.REST  { background-color: #FF4444; }
+    /* Good job overlay */
+    
+ #overlay {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0,0,0,0.5);
+  /* подтягиваем overlay наверх */
+  display: none;
+  z-index: 1000;
+  /* чтобы текст не выпал за край, на случай очень узких экранов: */
+  overflow-x: hidden;
 
-    /* Circular progress ring (SVG) */
-    .progress-ring{position:absolute;inset:0;display:grid;place-items:center;pointer-events:none}
-    svg{width:100%;height:100%}
-
-    .muted-line{font-size:13px;color:var(--muted);}
-    .repeats{font-weight:600;color:#fff}
-
-    /* Small control row */
-    .controls{display:flex;gap:10px}
-    .controls .btn{min-width:96px}
-
-    /* Mode colors */
-    body.PREP   .status-pill{background:linear-gradient(90deg,#ffd166,#ff6b6b);}
-    body.WORK   .status-pill{background:linear-gradient(90deg,#ff9f1c,#ff6b6b);}
-    body.REST   .status-pill{background:linear-gradient(90deg,#7b61ff,#4dd0e1);}
-
-    /* Finished overlay */
-    #overlay{position:fixed;inset:0;background:linear-gradient(180deg, rgba(0,0,0,0.5), rgba(0,0,0,0.7));display:none;place-items:center;z-index:200}
-    .good-job{background: linear-gradient(90deg,#7b61ff55,#4dd0e155);border-radius:14px;padding:20px 28px;font-weight:800;font-size:20px;color:#fff;backdrop-filter: blur(6px);}
-
-    /* Accessibility */
-    @media (prefers-reduced-motion: reduce){*{animation:none!important;transition:none!important}}
+    }
+  .good-job {
+  position: fixed;
+  top: 50%; 
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-family: 'Bebas Neue', sans-serif;
+  
+  /* АДАПТИВНЫЙ РАЗМЕР ШРИФТА: 
+     от 1.5rem (минимум) до 3rem (максимум),
+     где базовая величина — 5vw (5% ширины экрана) */
+  font-size: clamp(1.5rem, 5vw, 3rem);
+  
+  /* Запретить перенос текста:
+     вся надпись — в одну линию */
+  white-space: nowrap;
+  
+  color: #fff;
+  opacity: 0;
+  visibility: hidden;
+  z-index: 1001;
+  animation: fadeInOut 3s forwards;
+}
+    @keyframes fadeInOut {
+      0%   { opacity: 0; visibility: visible; }
+      20%  { opacity: 1; }
+      80%  { opacity: 1; }
+      100% { opacity: 0; visibility: hidden; }
+    }
   </style>
 </head>
 <body>
-  <div class="blobs" aria-hidden="true">
-    <div class="blob b1"></div>
-    <div class="blob b2"></div>
-    <div class="blob b3"></div>
+  <h1>Interval Timer</h1>
+
+  <form id="timerForm">
+    <label for="prepTime">Preparation Time (seconds):</label>
+<input
+  type="number"
+  id="prepTime"
+  min="1"
+  required
+/>
+
+<label for="workTime">Work Time (seconds):</label>
+<input
+  type="number"
+  id="workTime"
+  min="1"
+  required
+/>
+
+<label for="restTime">Rest Time (seconds):</label>
+<input
+  type="number"
+  id="restTime"
+  min="1"
+  required
+/>
+
+<label for="repeats">Repeats:</label>
+<input
+  type="number"
+  id="repeats"
+  min="1"
+  required
+/>
+
+    <button type="submit" id="startBtn">Start</button>
+  </form>
+
+  <div class="timer" id="timerScreen" aria-live="polite">
+    <div class="time" id="timeDisplay">0</div>
+    <div class="status" id="intervalStatus">—</div>
+    <p id="repeatsLeft">Repeats Left: 0</p>
+    <div class="progress-bar">
+      <div class="progress" id="progressBar"></div>
+    </div>
+    <div class="controls">
+      <button id="pauseBtn" disabled>Pause</button>
+      <button id="stopBtn" disabled>Stop</button>
+    </div>
   </div>
 
-  <div class="wrap">
+  <div id="overlay"></div>
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  // Элементы
+  const form         = document.getElementById('timerForm');
+  const timerScreen  = document.getElementById('timerScreen');
+  const timeDisplay  = document.getElementById('timeDisplay');
+  const statusDisplay= document.getElementById('intervalStatus');
+  const repeatsLeft  = document.getElementById('repeatsLeft');
+  const progressBar  = document.getElementById('progressBar');
+  const pauseBtn     = document.getElementById('pauseBtn');
+  const stopBtn      = document.getElementById('stopBtn');
+  const overlay      = document.getElementById('overlay');
 
-    <section class="card" style="width:420px;">
-      <header>
-        <div class="logo">TI</div>
-        <div>
-          <h1>Interval Timer</h1>
-          <p class="lead">Dark liquid‑glass UI — быстрый и приятный таймер для интервалов</p>
-        </div>
-      </header>
+  // Аудио
+  const audio = new Audio('assets/milestone.mp3');
+  audio.preload = 'auto';
 
-      <form id="timerForm" aria-label="Interval timer settings">
-        <div class="row">
-          <div class="small">
-            <label for="prepTime">Подготовка (сек)</label>
-            <input id="prepTime" type="number" min="1" value="5" required />
-          </div>
-          <div class="small">
-            <label for="workTime">Работа (сек)</label>
-            <input id="workTime" type="number" min="1" value="20" required />
-          </div>
-        </div>
+  // Состояние
+  let intervals = [];
+  let current   = 0;
+  let remaining = 0;
+  let timerID   = null;
+  let paused    = false;
 
-        <div class="row">
-          <div class="small">
-            <label for="restTime">Отдых (сек)</label>
-            <input id="restTime" type="number" min="1" value="10" required />
-          </div>
-          <div class="small">
-            <label for="repeats">Повторы</label>
-            <input id="repeats" type="number" min="1" value="3" required />
-          </div>
-        </div>
+  // Обработчики
+  form.addEventListener('submit', e => {
+    e.preventDefault();
+    initIntervals();
+    form.style.display = 'none';
+    timerScreen.style.display = 'block';
+    pauseBtn.disabled = false;
+    stopBtn.disabled  = false;
+    startLoop();
+  });
 
-        <div class="actions">
-          <button class="btn primary" type="submit" id="startBtn">Start</button>
-          <button class="btn ghost" type="button" id="quickBtn">Quick +1 rep</button>
-        </div>
-      </form>
+  pauseBtn.addEventListener('click', () => {
+    paused = !paused;
+    pauseBtn.textContent = paused ? 'Resume' : 'Pause';
+  });
 
-      <div style="margin-top:16px;display:flex;justify-content:space-between;align-items:center">
-        <div class="muted-line">Sound: <span id="soundState">On</span></div>
-        <div class="muted-line">Vibrate: <span id="vibeState">Auto</span></div>
-      </div>
-    </section>
+  stopBtn.addEventListener('click', reset);
 
-    <aside class="card panel">
-      <div class="clock" role="status" aria-live="polite" aria-atomic="true">
-        <div class="progress-ring" aria-hidden="true">
-          <svg viewBox="0 0 120 120" preserveAspectRatio="xMidYMid meet">
-            <defs>
-              <linearGradient id="g1" x1="0%" x2="100%">
-                <stop offset="0%" stop-color="var(--accent)"/>
-                <stop offset="100%" stop-color="var(--accent-2)"/>
-              </linearGradient>
-            </defs>
-            <circle cx="60" cy="60" r="50" stroke="rgba(255,255,255,0.04)" stroke-width="10" fill="none"></circle>
-            <circle id="ring" cx="60" cy="60" r="50" stroke="url(#g1)" stroke-width="10" fill="none" stroke-linecap="round" stroke-dasharray="314" stroke-dashoffset="314" transform="rotate(-90 60 60)"></circle>
-          </svg>
-        </div>
+  // Функции
+  function initIntervals() {
+    const prep = +document.getElementById('prepTime').value;
+    const work = +document.getElementById('workTime').value;
+    const rest = +document.getElementById('restTime').value;
+    const reps = +document.getElementById('repeats').value;
 
-        <div>
-          <div class="time-value" id="timeDisplay">0</div>
-        </div>
+    intervals = [];
+    for (let i = 0; i < reps; i++) {
+      intervals.push({ type: 'PREP', time: prep });
+      intervals.push({ type: 'WORK', time: work });
+      intervals.push({ type: 'REST', time: rest });
+    }
+    current   = 0;
+    remaining = intervals[0].time;
+    updateUI();
+  }
 
-        <div class="status-pill" id="intervalStatus">—</div>
-      </div>
-
-      <div style="width:100%;display:flex;justify-content:space-between;align-items:center;margin-top:16px">
-        <div class="repeats"><span id="repeatsLeft">Repeats Left: 0</span></div>
-        <div class="controls">
-          <button class="btn" id="pauseBtn" disabled>Pause</button>
-          <button class="btn" id="stopBtn" disabled>Stop</button>
-        </div>
-      </div>
-    </aside>
-
-  </div>
-
-  <div id="overlay" role="dialog" aria-hidden="true"><div class="good-job" id="goodJobMsg">Good job! ✅</div></div>
-
-  <audio id="ping" preload="auto">
-    <source src="assets/milestone.mp3" type="audio/mpeg">
-  </audio>
-
-  <script>
-    (function(){
-      // Elements
-      const form = document.getElementById('timerForm');
-      const timeDisplay = document.getElementById('timeDisplay');
-      const statusDisplay = document.getElementById('intervalStatus');
-      const repeatsLeft = document.getElementById('repeatsLeft');
-      const pauseBtn = document.getElementById('pauseBtn');
-      const stopBtn = document.getElementById('stopBtn');
-      const startBtn = document.getElementById('startBtn');
-      const quickBtn = document.getElementById('quickBtn');
-      const overlay = document.getElementById('overlay');
-      const goodJobMsg = document.getElementById('goodJobMsg');
-      const ring = document.getElementById('ring');
-      const ping = document.getElementById('ping');
-
-      // state
-      let intervals = []; let current = 0; let remaining = 0; let timerID = null; let paused = false;
-
-      form.addEventListener('submit', e => { e.preventDefault(); initIntervals(); enterRunState(); startLoop(); });
-      pauseBtn.addEventListener('click', () => { paused = !paused; pauseBtn.textContent = paused ? 'Resume' : 'Pause'; });
-      stopBtn.addEventListener('click', reset);
-      quickBtn.addEventListener('click', () => { // quick add
-        const r = document.getElementById('repeats'); r.value = Math.max(1, (+r.value || 0) + 1);
-      });
-
-      function initIntervals(){
-        const prep = Math.max(1, +document.getElementById('prepTime').value);
-        const work = Math.max(1, +document.getElementById('workTime').value);
-        const rest = Math.max(1, +document.getElementById('restTime').value);
-        const reps = Math.max(1, +document.getElementById('repeats').value);
-        intervals = [];
-        for(let i=0;i<reps;i++){ intervals.push({type:'PREP', time:prep}); intervals.push({type:'WORK', time:work}); intervals.push({type:'REST', time:rest}); }
-        current = 0; remaining = intervals[0].time; updateUI();
+  function startLoop() {
+    clearInterval(timerID);
+    paused = false;
+    timerID = setInterval(() => {
+      if (paused) return;
+      remaining--;
+      updateProgress();
+      if (remaining < 0) {
+        playAudio();
+        nextInterval();
+      } else {
+        updateUI();
       }
+    }, 1000);
+  }
 
-      function startLoop(){
-        clearInterval(timerID); paused=false; pauseBtn.disabled=false; stopBtn.disabled=false; startBtn.disabled=true;
-        timerID = setInterval(()=>{
-          if(paused) return; remaining--; if(remaining < 0){ playPing(); nextInterval(); } else { updateUI(); }
-        },1000);
-      }
+  function nextInterval() {
+    current++;
+    if (current >= intervals.length) {
+      finish();
+      return;
+    }
+    remaining = intervals[current].time;
+    updateUI();
+  }
 
-      function nextInterval(){ current++; if(current >= intervals.length){ finish(); return; } remaining = intervals[current].time; updateUI(); }
+  function updateUI() {
+    const inst = intervals[current];
+    timeDisplay.textContent    = remaining;
+    statusDisplay.textContent  = inst.type;
+    document.body.className    = inst.type;
+    const leftReps = Math.ceil((intervals.length - current) / 3);
+    repeatsLeft.textContent    = `Repeats Left: ${leftReps}`;
+    updateProgress();
+  }
 
-      function updateUI(){ const inst = intervals[current]; timeDisplay.textContent = remaining; statusDisplay.textContent = inst.type; document.body.className = inst.type;
-        const leftReps = Math.ceil((intervals.length - current) / 3);
-        repeatsLeft.textContent = `Repeats Left: ${leftReps}`;
-        updateRing(); }
+  function updateProgress() {
+    const total = intervals[current].time;
+    const pct   = Math.max(0, Math.min(100, (total - remaining)/total*100));
+    progressBar.style.width = pct + '%';
+  }
 
-      function updateRing(){ const total = intervals[current].time; const pct = Math.max(0, Math.min(1, (total - remaining)/total)); const circumference = 2 * Math.PI * 50; ring.style.strokeDashoffset = String(Math.round((1 - pct) * circumference)); }
+  function playAudio() {
+    audio.currentTime = 0;
+    audio.play().catch(console.error);
+    if (navigator.vibrate) navigator.vibrate(200);
+  }
 
-      function playPing(){ try{ ping.currentTime = 0; ping.play(); }catch(e){ console.log('sound err', e); } if(navigator.vibrate) navigator.vibrate(180); }
+  function finish() {
+    clearInterval(timerID);
+    showGoodJob();
+    setTimeout(reset, 3500);
+  }
 
-      function finish(){ clearInterval(timerID); overlay.style.display='grid'; overlay.setAttribute('aria-hidden','false'); goodJobMsg.textContent = 'Good job! 🎉'; setTimeout(()=>{ overlay.style.display='none'; overlay.setAttribute('aria-hidden','true'); reset(); }, 3000); }
+  function showGoodJob() {
+    overlay.style.display = 'block';
+    const msg = document.createElement('div');
+    msg.className = 'good-job';
+    msg.textContent = 'Good job bro! 🤾🏻‍♂️💪🏼';
+    document.body.appendChild(msg);
+  }
 
-      function reset(){ clearInterval(timerID); ping.pause(); ping.currentTime=0; form.reset(); document.getElementById('prepTime').value = 5; document.getElementById('workTime').value=20; document.getElementById('restTime').value=10; document.getElementById('repeats').value=3; startBtn.disabled=false; pauseBtn.disabled=true; stopBtn.disabled=true; pauseBtn.textContent='Pause'; document.body.className=''; timeDisplay.textContent='0'; repeatsLeft.textContent='Repeats Left: 0'; ring.style.strokeDashoffset = '314'; }
-
-      // init ring dasharray (circumference for r=50)
-      (function(){ ring.style.strokeDasharray = '314'; ring.style.strokeDashoffset = '314'; })();
-
-      // small accessibility: keyboard start
-      document.addEventListener('keydown', e => { if(e.code === 'Space' && document.activeElement === document.body){ e.preventDefault(); if(startBtn.disabled) pauseBtn.click(); else startBtn.click(); } });
-
-      // initialize form defaults
-      reset();
-
-    })();
-  </script>
-</body>
-</html>
+  function reset() {
+    clearInterval(timerID);
+    audio.pause();
+    audio.currentTime = 0;
+    document.querySelectorAll('.good-job').forEach(el => el.remove());
+    form.reset();
+    form.style.display       = 'flex';
+    timerScreen.style.display= 'none';
+    pauseBtn.disabled        = true;
+    stopBtn.disabled         = true;
+    pauseBtn.textContent     = 'Pause';
+    document.body.className  = '';
+    overlay.style.display    = 'none';
+    progressBar.style.width  = '0';
+  }
+});
+</script>
